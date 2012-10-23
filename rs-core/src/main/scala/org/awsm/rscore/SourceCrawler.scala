@@ -8,6 +8,6 @@ import org.awsm.rscommons.{StatsResponse, StatsRequest}
  * Date: 10/21/12
  */
 
-trait SourceParser {
+trait SourceCrawler {
       def getData(request: StatsRequest): StatsResponse
 }

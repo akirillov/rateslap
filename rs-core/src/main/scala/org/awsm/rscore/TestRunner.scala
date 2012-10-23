@@ -1,12 +1,13 @@
 package org.awsm.rscore
 
-import appannie.AppAnnieParser
+import appannie.AppAnnieDispatcher
 import org.awsm.rscommons.{AuthObject, StatsRequest}
 
 
 object TestRunner extends App {
-  val parser = new AppAnnieParser
-  val response = parser.getData(StatsRequest("someMethod",  "MegaStore", "SouthAfrica", AuthObject("user", "secret")))
-  println(response)
+  val dispatcher = new AppAnnieDispatcher
+
+  val response = dispatcher.getData(StatsRequest("someMethod",  "MegaStore", "SouthAfrica", AuthObject("user", "secret")))
+
   println("Resp JSON: "+response.generateJson())
 }
