@@ -7,13 +7,8 @@ import org.awsm.rscommons.StatsResponse
  * Date: 10/23/12
  */
 
-class ParserResponse (response: StatsResponse, error: String) {
-
-  def getData(): StatsResponse = response
-
-  def getError(): String = error
-
-  def hasError() = {
+class ParserResponse (val response: StatsResponse, val error: String) {
+  def hasError: Boolean = {
     error != null
   }
 

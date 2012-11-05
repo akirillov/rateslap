@@ -5,7 +5,7 @@ package org.awsm.rscommons
  * Date: 10/17/12
  */
 
-case class StatsRequest(methodName: String,  store: String, region: String, auth: AuthObject) extends JsonWrapper {
+class StatsRequest(val methodName: String,  val application: String, val date: String,  val store: String, val region: String, val auth: AuthObject) extends JsonWrapper {
   def getAuth(): AuthObject = auth
 }
 

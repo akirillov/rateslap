@@ -8,6 +8,6 @@ import xml.Elem
  * Date: 10/23/12
  */
 
-trait Parser {
+trait XmlParser {
   def parse(source: Elem): ParserResponse
 }

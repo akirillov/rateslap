@@ -1,7 +1,7 @@
 package org.awsm.rscore.appannie
 
-import org.awsm.rscore.{NeedAuth, SourceCrawler}
-import org.awsm.rscommons.{AuthObject, AuthResponse, StatsResponse, StatsRequest}
+import org.awsm.rscore.{SourceCrawler}
+import org.awsm.rscommons.{AuthObject, StatsResponse, StatsRequest}
 import xml.XML
 
 
@@ -10,35 +10,36 @@ import xml.XML
  * Date: 10/21/12
  */
 
-class AppAnnieDispatcher extends  SourceCrawler with NeedAuth{
+class AppAnnieDispatcher extends SourceCrawler{
 
-  override  def getData(request: StatsRequest): StatsResponse = {
-    //println(request)
-    //println("Req JSON: "+request.generateJson())
+  def getData(request: StatsRequest): StatsResponse = {
+    val params = buildParams(request)
+    val crawler: AppAnnieCrawler = new AppAnnieCrawler(params._1, params._2, params._3, params._4)
 
-    //TODO: val auth = authenticate(request.getAuth)
+    val xml: String = crawler.crawl(request.auth) match {
+      case None => "error"
+      case Some(page) => page
+    }
 
-    //println(auth)
-
-    //TODO: read file from remote store
-
-    // val source = scala.io.Source.fromFile("resources/html/test_rank.html")
-
-    val source = XML.loadFile("resources/html/test_rank.html")
-
-    val parser = new AppAnnieHTMLParser()
+    val source = XML.loadString(xml)
+    val parser = new AppAnnieXMLParser()
 
     val result = parser.parse(source)
 
-    if(result.hasError()) null else result.getData() //TODO: refactor to scala style
-
-
-
-    //    StatsResponse("2012-10-21",  "My AWESOME App",  "Third world country",  "-1000")
+    if(result.hasError) null else result.response
   }
 
-  override def authenticate(auth: AuthObject): AuthResponse = {
-    // some auth actions go here
-    AuthResponse(null, null, "No network connection!")
+  def buildParams(request: StatsRequest) = {
+    val date: String = request.date
+    val appName: String = request.application.replaceAll(" ", "-").toLowerCase
+    val store: String = if(request.store.replaceAll (" ","").toLowerCase.contains("appstore")) "ios" else request.store.toLowerCase
+    val rankType: String = request.store match {
+      case value: String => if(value.toLowerCase == "grossing") "grossing-ranks" else "ranks"
+      case _ => "ranks"
+    }
+
+    (date, appName, store, rankType)
   }
+
+  override def crawl(request: StatsRequest) = null
 }

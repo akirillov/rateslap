@@ -1,7 +1,7 @@
 package org.awsm.rscore.appannie
 
 import org.xml.sax.InputSource
-import org.awsm.rscore.{ParserResponse, Parser}
+import org.awsm.rscore.{ParserResponse, XmlParser}
 import org.awsm.rscommons.StatsResponse
 import xml.Elem
 
@@ -10,11 +10,11 @@ import xml.Elem
  * Date: 10/23/12
  */
 
-class AppAnnieHTMLParser extends Parser{
+class AppAnnieXMLParser extends XmlParser{
   override def parse(source: Elem) = {
 
 
 
-    new ParserResponse(StatsResponse("2012-10-21",  "My AWESOME App",  "Third world country",  "-1000"), null)
+    new ParserResponse(new StatsResponse("2012-10-21",  "My AWESOME App",  "Third world country",  "-1000"), null)
   }
 }

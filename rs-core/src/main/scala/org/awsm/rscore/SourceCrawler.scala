@@ -9,5 +9,5 @@ import org.awsm.rscommons.{StatsResponse, StatsRequest}
  */
 
 trait SourceCrawler {
-      def getData(request: StatsRequest): StatsResponse
+      def crawl(request: StatsRequest): StatsResponse
 }

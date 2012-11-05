@@ -5,6 +5,4 @@ package org.awsm.rscommons
  * Date: 10/21/12
  */
 
-case class AuthObject(username: String,  password: String) {
-
-}
+class AuthObject(val username: String,  val password: String)
