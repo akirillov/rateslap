@@ -13,6 +13,9 @@ import xml.XML
 class AppAnnieDispatcher extends SourceCrawler{
 
   def getData(request: StatsRequest): StatsResponse = {
+
+    //todo: implement actor-based params parsing
+
     val params = buildParams(request)
     val crawler: AppAnnieCrawler = new AppAnnieCrawler(params._1, params._2, params._3, params._4)
 
@@ -26,11 +29,12 @@ class AppAnnieDispatcher extends SourceCrawler{
 
     val result = parser.parse(source)
 
-    if(result.hasError) null else result.response
+    //todo: response generation
+    new StatsResponse("Awful error occured!")
   }
 
   def buildParams(request: StatsRequest) = {
-    val date: String = request.date
+    val date: String = request.date.head
     val appName: String = request.application.replaceAll(" ", "-").toLowerCase
     val store: String = if(request.store.replaceAll (" ","").toLowerCase.contains("appstore")) "ios" else request.store.toLowerCase
     val rankType: String = request.store match {

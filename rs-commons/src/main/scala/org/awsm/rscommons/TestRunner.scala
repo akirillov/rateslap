@@ -7,5 +7,5 @@ package org.awsm.rscommons
 
 object TestRunner extends App{
 
-  println(new StatsRequest("someMethod",  "Cut the rope", "2012-10-09", "appstore", "Russia", new AuthObject("user", "secret")).generateJson())
+  //println(new StatsRequest("someMethod",  "Cut the rope", "2012-10-09", "appstore", "Russia", new AuthObject("user", "secret")).generateJson())
 }

@@ -1,6 +1,6 @@
 package org.awsm.rscore.appannie
 
-import org.awsm.rscore.{ParserResponse, XmlParser}
+import org.awsm.rscore.{XmlParser}
 import org.awsm.rscommons.StatsResponse
 import xml.{Node, NodeSeq, Elem}
 
@@ -41,9 +41,10 @@ class AppAnnieXMLParser extends XmlParser{
       case nodes => createPair(nodeList.head) :: createRanks(nodeList.tail)
     }
     
-    createRanks(entries)
+    val pairs = createRanks(entries)
 
-    //todo: here actor must pass back the result
-    new ParserResponse(new StatsResponse("2012-10-21",  "My AWESOME App",  "Third world country",  "-1000"), null)
+    println(pairs)
+
+    pairs
   }
 }

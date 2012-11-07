@@ -9,5 +9,5 @@ import xml.Elem
  */
 
 trait XmlParser {
-  def parse(source: Elem): ParserResponse
+  def parse(source: Elem): List[Pair[String, String]]
 }
