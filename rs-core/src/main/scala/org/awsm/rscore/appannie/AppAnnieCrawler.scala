@@ -23,7 +23,7 @@ class AppAnnieCrawler(date: String, appName: String, store: String, rankType: St
     webClient.setCssEnabled(false)
     webClient.setJavaScriptEnabled(true)
     webClient.setAjaxController(new NicelyResynchronizingAjaxController)
-    webClient.waitForBackgroundJavaScript(2000)
+    webClient.waitForBackgroundJavaScript(5000)
     webClient.setUseInsecureSSL(true)
 
     val page: HtmlPage = webClient.getPage("https://www.appannie.com/account/login/")
@@ -47,8 +47,8 @@ class AppAnnieCrawler(date: String, appName: String, store: String, rankType: St
 
     //TODO: consider the case when no page found  -> should verify this situation and provide warning or error
 
-    form.getButtonByName("").click()
-
+    val p: HtmlPage = form.getButtonByName("").click().asInstanceOf[HtmlPage]        //TODO: CATCH AUTH FAIL HERE by String "wrong username or password"
+    println(p.asXml())
     //page crawling
     new Some[String](webClient.getPage(url).asInstanceOf[HtmlPage].asXml())
   }
