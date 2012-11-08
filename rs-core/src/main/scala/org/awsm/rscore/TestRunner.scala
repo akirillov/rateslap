@@ -40,7 +40,7 @@ object TestRunner extends App {
 
   val result = parser.parse(source)
 
- /* val xml = crawler.crawl()
+ /* val xml = crawler.getData()
 
 
   val source = XML.loadString(xml)

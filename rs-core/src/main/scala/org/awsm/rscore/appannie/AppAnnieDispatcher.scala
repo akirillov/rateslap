@@ -1,6 +1,6 @@
 package org.awsm.rscore.appannie
 
-import org.awsm.rscore.{SourceCrawler}
+import org.awsm.rscore.{ParsingDispatcher}
 import org.awsm.rscommons.{AuthObject, StatsResponse, StatsRequest}
 import xml.XML
 
@@ -10,29 +10,54 @@ import xml.XML
  * Date: 10/21/12
  */
 
-class AppAnnieDispatcher extends SourceCrawler{
+class AppAnnieDispatcher extends ParsingDispatcher{
 
-  def getData(request: StatsRequest): StatsResponse = {
+  override def getData(application: String, store: String, rankType: String, dates: List[String], country: Set[String], auth: AuthObject): StatsResponse = {
+    val crawler: AppAnnieCrawler = new AppAnnieCrawler(application, store, rankType)
+    val webClient = crawler.authenticate(auth)
 
-    val params = buildParams(request)
+    if (dates.size == 1) {
+      val xml: String = crawler.crawl(webClient, dates.head) match {
+        case None => "error" //todo: handle this case
+        case Some(page) => page
+      }
 
-    //todo: first goes database lookup, then - crawling for every date
-
-    val crawler: AppAnnieCrawler = new AppAnnieCrawler(params._1, params._2, params._3)
-    val webClient = crawler.authenticate(request.auth)
+      val result = new AppAnnieXMLParser().parse(XML.loadString(xml))
+    } else {
 
 
+      /*
+      if there are a list of dates:
 
+        foreach new actor ! (webClient, date)
 
-    val xml: String = crawler.crawl(webClient, params._4.head) match {
-      case None => "error"
-      case Some(page) => page
+        */
     }
+    
+    
 
-    val source = XML.loadString(xml)
-    val parser = new AppAnnieXMLParser()
 
-    val result = parser.parse(source)
+    //ELSE: list of dates -> parallel:
+
+
+    /*
+
+    lookup database:
+
+    val result = lookupdDB(params) match {
+
+
+     case none => authenticate and crawl
+     case some => nothing to do
+
+
+
+
+
+    */
+
+
+
 
     //todo: response generation
     new StatsResponse("Awful error occured!")
@@ -40,7 +65,7 @@ class AppAnnieDispatcher extends SourceCrawler{
 
 
   def buildParams(request: StatsRequest) = {
-    val dates: List[String] = request.date
+    val dates: List[String] = request.dates
     val appName: String = request.application.replaceAll(" ", "-").toLowerCase
     val store: String = if(request.store.replaceAll (" ","").toLowerCase.contains("appstore")) "ios" else request.store.toLowerCase
     val rankType: String = request.store match {
@@ -50,6 +75,4 @@ class AppAnnieDispatcher extends SourceCrawler{
 
     (appName, store, rankType, dates)
   }
-
-  override def crawl(request: StatsRequest) = null
 }
