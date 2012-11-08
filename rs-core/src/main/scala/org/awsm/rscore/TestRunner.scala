@@ -23,9 +23,12 @@ object TestRunner extends App {
 
 
 
-  val crawler = new AppAnnieCrawler(date, appName, store, rankType)
+  val crawler = new AppAnnieCrawler(appName, store, rankType)
+  val webClient = crawler.authenticate(new AuthObject("akirillov@zeptolab.com", "7ru57n01"))
 
-  val xml: String = crawler.crawl(new AuthObject("akirillov@zeptolab.com", "7ru57n01")) match {
+
+
+  val xml: String = crawler.crawl(webClient, date) match {
     case None => "error"
     case Some(page) => page
   }

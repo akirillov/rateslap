@@ -1,6 +1,7 @@
 package logic
 
 import domain.RequestBuilder
+import com.codahale.jerkson.Json
 import play.api.libs.json.{Json, JsValue}
 
 /**

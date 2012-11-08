@@ -14,12 +14,17 @@ class AppAnnieDispatcher extends SourceCrawler{
 
   def getData(request: StatsRequest): StatsResponse = {
 
-    //todo: implement actor-based params parsing
-
     val params = buildParams(request)
-    val crawler: AppAnnieCrawler = new AppAnnieCrawler(params._1, params._2, params._3, params._4)
 
-    val xml: String = crawler.crawl(request.auth) match {
+    //todo: first goes database lookup, then - crawling for every date
+
+    val crawler: AppAnnieCrawler = new AppAnnieCrawler(params._1, params._2, params._3)
+    val webClient = crawler.authenticate(request.auth)
+
+
+
+
+    val xml: String = crawler.crawl(webClient, params._4.head) match {
       case None => "error"
       case Some(page) => page
     }
@@ -33,8 +38,9 @@ class AppAnnieDispatcher extends SourceCrawler{
     new StatsResponse("Awful error occured!")
   }
 
+
   def buildParams(request: StatsRequest) = {
-    val date: String = request.date.head
+    val dates: List[String] = request.date
     val appName: String = request.application.replaceAll(" ", "-").toLowerCase
     val store: String = if(request.store.replaceAll (" ","").toLowerCase.contains("appstore")) "ios" else request.store.toLowerCase
     val rankType: String = request.store match {
@@ -42,7 +48,7 @@ class AppAnnieDispatcher extends SourceCrawler{
       case _ => "ranks"
     }
 
-    (date, appName, store, rankType)
+    (appName, store, rankType, dates)
   }
 
   override def crawl(request: StatsRequest) = null
