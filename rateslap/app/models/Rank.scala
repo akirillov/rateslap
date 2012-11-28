@@ -1,16 +1,18 @@
-import java.security.MessageDigest
-import java.util.Date
+package models
 
-import play.api.db._
+import anorm.SqlParser._
+import anorm.~._
+import play.api.db.DB
+import anorm._
+import java.security.MessageDigest
 import play.api.Play.current
 
-import anorm._
-import anorm.SqlParser._
-
+/**
+ * Created by: akirillov
+ * Date: 11/27/12
+ */
 
 case class Rank(id: Pk[Long] = NotAssigned, game: String, platform: String, rankType: String, date: String,  country: String, rank: Int)
-
-
 
 object Rank {
 
@@ -27,7 +29,7 @@ object Rank {
   }
 
   //todo: finish and test
-  def find(game: String, platform: String, rankType: String, date: String,  country: String) = {
+  def find(game: String, platform: String, rankType: String, date: String, country: String) = {
     DB.withConnection { implicit connection =>
       SQL(
         """
@@ -36,7 +38,9 @@ object Rank {
         and game = {game}
         and platform = {platform}
         and type = {type}
-        and date = {date}"
+        and date = {date}
+        and country = {country}"
+
       """
       ).on(
         'game -> game,
@@ -45,8 +49,41 @@ object Rank {
         'date -> date,
         'country -> country,
         'hash -> new String(MessageDigest.getInstance("MD5").digest((game+platform).getBytes())) //we store data in single large table, so we'll use surrogate hash in index to speed up access
-      )//.as(Rank ^^ flatten *)
+      ).list()
       //todo: http://www.playframework.org/documentation/2.0/ScalaAnorm
+    }
+  }
+
+  def find(game: String, platform: String, rankType: String, dates: List[String], countries: List[String]) = {
+    //todo: IN clause http://stackoverflow.com/questions/9528273/in-clause-in-anorm
+
+    /*
+    User.find("id in (%s)"
+  .format(params.map("'%s'".format(_)).mkString(",") )
+  .list()
+
+    */
+
+    DB.withConnection { implicit connection =>
+      SQL(
+        """
+        select * from computer
+        where hash = {hash}
+        and game = {game}
+        and platform = {platform}
+        and type = {type}
+        and date IN ({dates})
+        and country IN ({countries})"
+      """
+      ).on(
+        'game -> game,
+        'platform -> platform,
+        'type -> rankType,
+        'dates -> dates.reduceLeft((acc, s) => acc + "," + s),
+        'countries -> countries.reduceLeft((acc, s) => acc + "," + s),
+        'hash -> new String(MessageDigest.getInstance("MD5").digest((game+platform).getBytes())) //we store data in single large table, so we'll use surrogate hash in index to speed up access
+      ).list()
+
     }
   }
 
@@ -65,9 +102,9 @@ object Rank {
         'platform -> rank.platform,
         'type -> rank.rankType,
         'date -> rank.date,
-      'country -> rank.country,
-      'rank -> rank.rank,
-      'hash -> new String(MessageDigest.getInstance("MD5").digest((rank.game+rank.platform).getBytes()))
+        'country -> rank.country,
+        'rank -> rank.rank,
+        'hash -> new String(MessageDigest.getInstance("MD5").digest((rank.game+rank.platform).getBytes()))
       ).executeUpdate()
     }
   }

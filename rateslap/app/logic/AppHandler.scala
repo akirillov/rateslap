@@ -1,8 +1,10 @@
 package logic
 
 import domain.RequestBuilder
+import models._
 import com.codahale.jerkson.Json
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json._
+import play.Logger
 
 /**
  * Created by: akirillov
@@ -11,9 +13,14 @@ import play.api.libs.json.{Json, JsValue}
 
 object AppHandler {
 
-  def getSingleDayStats(request: JsValue): JsValue = {
+  def getGameStats(request: JsValue): JsValue = {
 
-    RequestBuilder.buildRequestFromJson(request)
+    val statsRequest = RequestBuilder.buildRequestFromJson(request)
+
+    Logger.info("stats request created: "+statsRequest.toString())
+    //Rank.find()
+
+    //Rank.find()
 
     //here we will pass built object to library and will wait for response
     //Akka will be hidden in those library
