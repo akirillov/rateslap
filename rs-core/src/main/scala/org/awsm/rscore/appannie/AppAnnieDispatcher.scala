@@ -3,6 +3,7 @@ package org.awsm.rscore.appannie
 import org.awsm.rscore.{ParsingDispatcher}
 import org.awsm.rscommons.{AuthObject, StatsResponse, StatsRequest}
 import xml.XML
+import org.awsm.rscore.exception.NoResultsFoundException
 
 
 /**
@@ -16,51 +17,25 @@ class AppAnnieDispatcher extends ParsingDispatcher{
     val crawler: AppAnnieCrawler = new AppAnnieCrawler(application, store, rankType)
     val webClient = crawler.authenticate(auth)
 
-    if (dates.size == 1) {
+    if (dates.size == 1) { //todo: parse a list of dates after auth
       val xml: String = crawler.crawl(webClient, dates.head) match {
-        case None => "error" //todo: handle this case
+        case None => throw NoResultsFoundException("No page found for "+dates.head) //todo: move to internal exception handling
         case Some(page) => page
       }
 
       val result = new AppAnnieXMLParser().parse(XML.loadString(xml))
+      val ranks: scala.collection.mutable.Map[String, String] = new scala.collection.mutable.HashMap[String, String]()
+
+      result.foreach(tuple => ranks.put(tuple._1, tuple._2))
+
+      //appName: String, store: String, rankings: Map[String, Map[String,  String]]
+      new StatsResponse(application, store, Map(dates.head -> ranks.toMap))
     } else {
+       new StatsResponse("No data had been captured from AppAnnie service")
 
 
-      /*
-      if there are a list of dates:
 
-        foreach new actor ! (webClient, date)
-
-        */
     }
-    
-    
-
-
-    //ELSE: list of dates -> parallel:
-
-
-    /*
-
-    lookup database:
-
-    val result = lookupdDB(params) match {
-
-
-     case none => authenticate and crawl
-     case some => nothing to do
-
-
-
-
-
-    */
-
-
-
-
-    //todo: response generation
-    new StatsResponse("Awful error occured!")
   }
 
 

@@ -4,7 +4,6 @@ import scala.xml._
 
 object RateSlapBuild extends Build {
 
-
  lazy val rateslap = Project(id = "rsws", base = file("rateslap")) dependsOn(rscore, rscommons) aggregate (rscore, rscommons)
 
  lazy val rscore = Project(id = "rscore", base = file("rs-core")) dependsOn(rscommons)
@@ -14,6 +13,7 @@ object RateSlapBuild extends Build {
 
   lazy val root = Project(id = "rateslap", base = file(".")) aggregate(rateslap, rscore, rscommons)
 
+  //publishTo := Some(Resolver.file("Local SBT Repository", file(Path.userHome.absolutePath+"/.ivy2/local"))(Resolver.ivyStylePatterns))
 
   /*
    val common  = Project("hi-common", file("common"))

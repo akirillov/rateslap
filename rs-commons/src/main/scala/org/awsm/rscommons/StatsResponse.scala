@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat
  * Date: 10/17/12
  */
 
-class StatsResponse(val appName: String,  val store: String, val rankings: Map[String, Map[String, String]], val error: String) extends  Response with JsonWrapper{
+class StatsResponse(val application: String,  val store: String, val rankings: Map[String, Map[String, String]], val error: String) extends  Response with JsonWrapper{
   def this(appName: String, store: String, rankings: Map[String, Map[String,  String]]) {
     this(appName, store, rankings, null)
   }
@@ -44,4 +44,4 @@ class StatsResponse(val appName: String,  val store: String, val rankings: Map[S
   }
 }
 
-
+//todo: switch to case class

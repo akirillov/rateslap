@@ -1,10 +1,12 @@
 name := "rs-commons"
 
+publishMavenStyle := true
+
 organization := "org.awsm.rscommons"
 
 version := "0.0.1"
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.10.0"
 
 resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 

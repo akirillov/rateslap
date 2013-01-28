@@ -1,17 +1,17 @@
 package logic.domain
 
-import play.api.libs.json._
+import play.api.libs.json.Json._
 import java.util.Date
 import play.api.Logger
-import org.awsm.rscommons.{AuthObject, StatsRequest}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import logic.exception.JsonParamsException
+import org.awsm.rscommons.{StatsResponse, AuthObject, StatsRequest}
 
 /**
- * Created by: akirillov
- * Date: 10/17/12
+ * Class represents JSON request parsing logic and forming StatsRequest.
+ * Throws exception in case of wrong or absent parameters set.
  */
-
-
 object RequestBuilder{
 
   def buildRequestFromJson(json: JsValue): StatsRequest = {
@@ -36,11 +36,10 @@ object RequestBuilder{
 
     val authObject = getAuthObjectFromJson(params)
 
-    new StatsRequest(getParameterFromJson(json, "method"), application, store, rankType, dates, countries, authObject)
-    //todo: do we really need this method? remove method name from StatsRequest
+    new StatsRequest(application, store, rankType, dates, countries, authObject)
   }
 
-  
+
   def getParameterFromJson(json: JsValue, fieldName: String): String = {
     (json \ fieldName).asOpt[String] match {
       case Some(value) => value
@@ -71,6 +70,18 @@ object RequestBuilder{
 
     new AuthObject(getParameterFromJson(auth, "username"),getParameterFromJson(auth, "password"))
   }
-  
+
+
+  def buildJsonResponse(data: StatsResponse): JsValue = {
+    JsObject(
+      Seq(
+        "application" -> JsString(data.application),
+        "store" -> JsString(data.store),
+
+            if(data.rankings != null) { "rankings" -> Json.toJson (data.rankings)} else {"rankings" -> JsNull},
+
+        "error" -> JsString(data.error)
+      ))
+  }
   //todo: get and validate dates in extra method
 }

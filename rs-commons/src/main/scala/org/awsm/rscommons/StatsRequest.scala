@@ -15,14 +15,14 @@ import collection.immutable.HashSet
  * Date: 10/17/12
  */
 
-class StatsRequest(val methodName: String,  val application: String, val store: String, val rankType: String, val dates: List[String],  val countries: Set[String], val auth: AuthObject) extends JsonWrapper {
+class StatsRequest(val application: String, val store: String, val rankType: String, val dates: List[String],  val countries: Set[String], val auth: AuthObject) extends JsonWrapper {
 
-  def this(methodName: String,  application: String, store: String, rankType: String, date: String, countries: Set[String], auth: AuthObject) = {
-    this(methodName,  application, store, rankType, date::List(), countries, auth)
+  def this(application: String, store: String, rankType: String, date: String, countries: Set[String], auth: AuthObject) = {
+    this(application, store, rankType, date::List(), countries, auth)
   }
 
-  def this(methodName: String,  application: String, store: String, rankType: String, dates: List[String], country: String, auth: AuthObject) = {
-    this(methodName,  application, store, rankType, dates, Set()+country, auth)
+  def this(application: String, store: String, rankType: String, dates: List[String], country: String, auth: AuthObject) = {
+    this(application, store, rankType, dates, Set()+country, auth)
   }
 }
 

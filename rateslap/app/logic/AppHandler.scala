@@ -1,10 +1,14 @@
 package logic
 
+import concurrent.{ManagerActor, ParserActor, DBActor}
+import db.{SingleDateRequestWithAuth, SingleDateRequest}
 import domain.RequestBuilder
 import models._
 import com.codahale.jerkson.Json
 import play.api.libs.json._
 import play.Logger
+import org.awsm.rscommons.StatsResponse
+import actors.Actor._
 
 /**
  * Created by: akirillov
@@ -18,19 +22,19 @@ object AppHandler {
     val statsRequest = RequestBuilder.buildRequestFromJson(request)
 
     Logger.info("stats request created: "+statsRequest.toString())
-    //Rank.find()
 
-    //Rank.find()
+   val manager = new ManagerActor
+    manager.start()
 
-    //here we will pass built object to library and will wait for response
-    //Akka will be hidden in those library
+    val future =  manager !? statsRequest
 
-
-
-    request
+    future match {
+      case resp: StatsResponse => Logger.info("RESPONSE CAPTURED! "+resp.error); RequestBuilder.buildJsonResponse(resp)
+      case _ => RequestBuilder.buildJsonResponse(new StatsResponse("Unknown error occured. No data. See server log for details."))
+    }
   }
 
   def getMultiGamesStats(request: JsValue): JsValue = {
-     request
+    request
   }
 }

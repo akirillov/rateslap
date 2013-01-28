@@ -5,6 +5,7 @@ import com.gargoylesoftware.htmlunit.html.{HtmlInput, HtmlForm, HtmlPage}
 import com.gargoylesoftware.htmlunit._
 import scala.xml.XML
 import org.awsm.rscommons.AuthObject
+import org.awsm.rscore.exception.ParsingException
 
 
 /**
@@ -38,20 +39,22 @@ class AppAnnieCrawler(val appName: String, val store: String, val rankType: Stri
     try {
       form.getInputByName("username").asInstanceOf[HtmlInput].setValueAttribute(auth.username)
     } catch {
-      case e: ElementNotFoundException => println("Parsing error. Something is wrong with HTML on AppAnnie page")
+      case e: ElementNotFoundException => throw ParsingException("Parsing error. Something is wrong with HTML on AppAnnie login page")
     }
 
     try {
       form.getInputByName("password").asInstanceOf[HtmlInput].setValueAttribute(auth.password)
     } catch {
-      case e: ElementNotFoundException => println("Parsing error. Something is wrong with HTML on AppAnnie page")
+      case e: ElementNotFoundException => throw ParsingException("Parsing error. Something is wrong with HTML on AppAnnie login page")
     }
 
     //TODO: consider the case when no page found  -> should verify this situation and provide warning or error
 
-    val p: HtmlPage = form.getButtonByName("").click().asInstanceOf[HtmlPage]        //TODO: CATCH AUTH FAIL HERE by String "wrong username or password"
+    val p = form.getButtonByName("").click().asInstanceOf[HtmlPage].asText()        //TODO: CATCH AUTH FAIL HERE by String "wrong username or password"
 
-    //analyze page for errors etc
+    if( p.contains("email or password is invalid") || p.contains("invalid") || p.contains("wrong")) throw ParsingException("Check username and password. It looks like they're wrong or page layout changed")
+
+    //todo: improve analisys
 
     webClient
   }
