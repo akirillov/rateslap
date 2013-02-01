@@ -1,9 +1,11 @@
 package logic.concurrent
 
 import models.Rank
-import org.awsm.rscommons.StatsRequest
 import logic.db.{Stop, SingleDateRequest}
 import actors.Actor
+import org.awsm.rscommons.{StatsResponse, StatsRequest}
+import anorm.NotAssigned
+import play.Logger
 
 /**
  * Created by: akirillov
@@ -12,10 +14,21 @@ import actors.Actor
 
 class DBActor extends Actor {
   def act() {
-    loop {
-      react {
-        case request: SingleDateRequest =>
-          sender ! Rank.find(request.game, request.rankType, request.date, request.country)
+    receive {
+      case response: StatsResponse => {
+        if(Option(response.error).isEmpty && !response.rankings.isEmpty){
+          response.rankings foreach {
+            case (key, value) => {
+              value foreach {
+                case (country, rank) => {
+                  if (rank.matches("[+-]?\\d+")) {
+                    Rank.insert(Rank(id = NotAssigned, game = response.application, rankType = response.rankType, date = key,  country, Integer.parseInt(rank)))
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

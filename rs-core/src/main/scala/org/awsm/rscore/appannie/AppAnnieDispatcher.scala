@@ -13,41 +13,31 @@ import org.awsm.rscore.exception.NoResultsFoundException
 
 class AppAnnieDispatcher extends ParsingDispatcher{
 
-  override def getData(application: String, store: String, rankType: String, dates: List[String], country: Set[String], auth: AuthObject): StatsResponse = {
-    val crawler: AppAnnieCrawler = new AppAnnieCrawler(application, store, rankType)
-    val webClient = crawler.authenticate(auth)
+  override def getData(application: String, store: String, rankType: String, dates: List[String], countries: Set[String], auth: AuthObject): StatsResponse = {
+    getData(dates, new AppAnnieCrawler(application, store, rankType, auth))
+  }
+  
+  def getData(dates: List[String], crawler: AppAnnieCrawler): StatsResponse = {
+    if (dates.size == 1) {
 
-    if (dates.size == 1) { //todo: parse a list of dates after auth
-      val xml: String = crawler.crawl(webClient, dates.head) match {
+      val xml: String = crawler.crawl(dates.head) match {
         case None => throw NoResultsFoundException("No page found for "+dates.head) //todo: move to internal exception handling
         case Some(page) => page
       }
 
-      val result = new AppAnnieXMLParser().parse(XML.loadString(xml))
-      val ranks: scala.collection.mutable.Map[String, String] = new scala.collection.mutable.HashMap[String, String]()
+      parseAndBuildResponse(crawler.appName, crawler.store, crawler.rankType, dates.head, xml)
 
-      result.foreach(tuple => ranks.put(tuple._1, tuple._2))
-
-      //appName: String, store: String, rankings: Map[String, Map[String,  String]]
-      new StatsResponse(application, store, Map(dates.head -> ranks.toMap))
     } else {
-       new StatsResponse("No data had been captured from AppAnnie service")
-
-
-
+      new StatsResponse("No data had been captured from AppAnnie service")
     }
   }
 
+  def  parseAndBuildResponse(app: String,  store: String, rankType: String,  date: String, xml: String): StatsResponse = {
+    val result = new AppAnnieXMLParser().parse(XML.loadString(xml))
+    val ranks: scala.collection.mutable.Map[String, String] = new scala.collection.mutable.HashMap[String, String]()
 
-  def buildParams(request: StatsRequest) = {
-    val dates: List[String] = request.dates
-    val appName: String = request.application.replaceAll(" ", "-").toLowerCase
-    val store: String = if(request.store.replaceAll (" ","").toLowerCase.contains("appstore")) "ios" else request.store.toLowerCase
-    val rankType: String = request.store match {
-      case value: String => if(value.toLowerCase == "grossing") "grossing-ranks" else "ranks"
-      case _ => "ranks"
-    }
+    result.foreach(tuple => ranks.put(tuple._1, tuple._2))
 
-    (appName, store, rankType, dates)
+    new StatsResponse(app, store, rankType, Map(date -> ranks.toMap))
   }
 }

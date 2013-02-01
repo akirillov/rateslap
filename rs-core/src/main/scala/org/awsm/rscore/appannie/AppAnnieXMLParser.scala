@@ -3,6 +3,7 @@ package org.awsm.rscore.appannie
 import org.awsm.rscore.{XmlParser}
 import org.awsm.rscommons.StatsResponse
 import xml.{Node, NodeSeq, Elem}
+import org.awsm.rscore.exception.ParsingException
 
 /**
  * Created by: akirillov
@@ -11,40 +12,41 @@ import xml.{Node, NodeSeq, Elem}
 
 class AppAnnieXMLParser extends XmlParser{
   override def parse(source: Elem) = {
-    val entries = (source \\ "tr" filter(p  =>  (p \ "@class").text.equals("ranks"))).toList
+    val countries = (source \\ "tr" filter(p  =>  (p \ "@class").text.equals("ranks") && !((p \\ "a" text).equals("")))).toList
+    val ranks = (source \\ "tr" filter(p  =>  (p \ "@class").text.equals("ranks")))
+      .filter (n => ((n \\ "td").size > 0) && ((n \\ "td").head \ "@title" text).equals("Rank #"))
+      .map(r => (r \\ "td").head)
 
     //todo: check list and throw exception
 
-    //after that we have such piece of html
-    /*
-     <tr class="ranks">
-                            <td class="appstore">
-                              <div>
-                                <a href="/app/ios/cut-the-rope/ranking/history/#store_id=143573">
-                                  Ghana
-                                </a>
-                              </div>
-                            </td>
-                            <td title="Rank #" class="rank down rank-level-500">
+    println("Countries size: "+countries.size +"  Ranks size: "+ranks.size)
+    /*if ((countries.size == 0)||(ranks.size==0)){
+      println(source)
+    }*/
 
-            408
-
-                            </td>
-     */
-
-    def createPair(node: Node): Pair[String, String] = {
-      ((node \\ "a" text).replaceAll("\\n", "").trim(), (node \\ "td" filter(p  =>  (p \ "@title").text.equals("Rank #"))).head.text.replaceAll("\\n", "").trim())
+    def createPair(country: Node, rank: Node): Pair[String, String] = {
+      val result = ( (country \\ "a" text).replaceAll("\\n", "").trim(), rank.text.replaceAll("\\n", "").trim() )
+      //todo: validate values and throw exception
+      result
     }
 
-    def createRanks(nodeList: List[Node]): List[Pair[String, String]] = nodeList match {
-      case List() => List()
-      case nodes => createPair(nodeList.head) :: createRanks(nodeList.tail)
+    def createRanks(countriesList: List[Node], ranksList: List[Node]): List[Pair[String, String]] = (countriesList, ranksList) match {
+      case (List(), _) | (_, List()) => List()
+      case (_ , _) => {
+        try{
+          createPair(countriesList.head, ranksList.head) :: createRanks(countriesList.tail,ranksList.tail)
+        } catch {
+          case t :Throwable => t.printStackTrace(); throw ParsingException("Internal parser error. AppAnnie HTML markup might have been changed and parsers were not able to parse it. Please check new markup and update corresponding parsers.")
+        }
+      }
     }
-    
-    val pairs = createRanks(entries)
 
-    println(pairs)
 
-    pairs
+    try{
+      val pairs = createRanks(countries, ranks.toList)
+      pairs
+    } catch {
+      case t :Throwable => t.printStackTrace(); throw ParsingException("Internal parser error. AppAnnie HTML markup might have been changed and parsers were not able to parse it. Please check new markup and update corresponding parsers.")
+    }
   }
 }

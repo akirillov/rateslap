@@ -13,23 +13,25 @@ import org.awsm.rscore.exception.ParsingException
  * Date: 10/23/12
  */
 
-class AppAnnieCrawler(val appName: String, val store: String, val rankType: String) {
+class AppAnnieCrawler(val appName: String, val store: String, val rankType: String, auth: AuthObject) {
 
   //base url without date specified
-  val url = "http://www.appannie.com/app/" + store + "/" + appName.replaceAll(" ", "-").toLowerCase + "/ranking/#view=" + rankType + "&date="
+  private val url = "http://www.appannie.com/app/" + (if(store.equals("appstore")){"ios"} else {store}) + "/" + appName.replaceAll(" ", "-").toLowerCase + "/ranking/#view=" + rankType + "&date="
+
+  private val webClient = authenticate(auth)
 
   //todo: add exceptions throwing and test invalid parameters
-  def crawl(webClient: WebClient, date: String): Option[String] = {
+  def crawl(date: String): Option[String] = {
     new Some[String](webClient.getPage(url+date).asInstanceOf[HtmlPage].asXml())
   }
 
-  def authenticate(auth: AuthObject): WebClient = {
+  private def authenticate(auth: AuthObject): WebClient = {
     val webClient: WebClient = new WebClient(BrowserVersion.FIREFOX_3_6)
     webClient.setThrowExceptionOnScriptError(false)
-    webClient.setCssEnabled(false)
+    webClient.setCssEnabled(true)
     webClient.setJavaScriptEnabled(true)
     webClient.setAjaxController(new NicelyResynchronizingAjaxController)
-    webClient.waitForBackgroundJavaScript(5000)
+    webClient.waitForBackgroundJavaScript(10000)
     webClient.setUseInsecureSSL(true)
 
     val page: HtmlPage = webClient.getPage("https://www.appannie.com/account/login/")
@@ -59,5 +61,3 @@ class AppAnnieCrawler(val appName: String, val store: String, val rankType: Stri
     webClient
   }
 }
-
-object AppAnnieCrawler

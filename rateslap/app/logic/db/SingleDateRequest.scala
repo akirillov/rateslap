@@ -5,4 +5,4 @@ package logic.db
  * Date: 11/29/12
  */
 
-case class SingleDateRequest(game: String, rankType: String, date: String, country: String)
+case class SingleDateRequest(application: String, store: String,  rankType: String, date: String)

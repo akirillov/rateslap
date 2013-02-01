@@ -25,16 +25,16 @@ import java.text.SimpleDateFormat
  * Date: 10/17/12
  */
 
-class StatsResponse(val application: String,  val store: String, val rankings: Map[String, Map[String, String]], val error: String) extends  Response with JsonWrapper{
-  def this(appName: String, store: String, rankings: Map[String, Map[String,  String]]) {
-    this(appName, store, rankings, null)
+class StatsResponse(val application: String,  val store: String, val rankType: String, val rankings: Map[String, Map[String, String]], val error: String) extends  Response with JsonWrapper{
+  def this(appName: String, store: String, rankType: String, rankings: Map[String, Map[String,  String]]) {
+    this(appName, store, rankType, rankings, null)
   }
 
   def this(error: String){
-    this(null,  null, null, error)
+    this(null,  null, null, null, error)
   }
 
-  override def getRank(country: String, date: String): String =  {
+  override def getRank(date: String, country: String): String =  {
     if (error != null) throw new NoDataFoundException("This response contains no data. Check error message for details")
     else date match {
       case null => if(rankings.size == 1) rankings.values.head.getOrElse(country, null)
