@@ -8,9 +8,8 @@ CREATE TABLE `ratings` (
   `date` varchar(10) NOT NULL,
   `country` varchar(45) NOT NULL,
   `rank` int(11) NOT NULL,
-  `hash` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `HASH` (`hash`,`game`,`platform`,`type`,`date`)
+  KEY `HASH` (`game`, `date`, `platform`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

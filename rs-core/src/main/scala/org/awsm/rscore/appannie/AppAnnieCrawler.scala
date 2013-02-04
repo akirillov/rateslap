@@ -18,7 +18,7 @@ class AppAnnieCrawler(val appName: String, val store: String, val rankType: Stri
   //base url without date specified
   private val url = "http://www.appannie.com/app/" + (if(store.equals("appstore")){"ios"} else {store}) + "/" + appName.replaceAll(" ", "-").toLowerCase + "/ranking/#view=" + rankType + "&date="
 
-  private val webClient = authenticate(auth)
+  private var webClient = authenticate(auth)
 
   //todo: add exceptions throwing and test invalid parameters
   def crawl(date: String): Option[String] = {

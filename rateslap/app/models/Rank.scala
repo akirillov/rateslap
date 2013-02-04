@@ -4,8 +4,8 @@ import anorm.SqlParser._
 import play.api.db.DB
 import java.security.MessageDigest
 import play.api.Play.current
+import play.api.Logger
 import anorm._
-import logic.db.SingleDateRequest
 
 /**
  * Created by: akirillov
@@ -17,75 +17,63 @@ case class Rank(id: Pk[Long] = NotAssigned, game: String, rankType: String, date
 object Rank {
 
   val build = {
-    get[Pk[Long]]("rank.id") ~
-      get[String]("rank.game") ~
-      get[String]("rank.type") ~
-      get[String]("rank.date") ~
-      get[String]("rank.coutry") ~
-      get[Int]("rank.rank") map {
+      get[Pk[Long]]("id") ~
+      get[String]("game") ~
+      get[String]("type") ~
+      get[String]("date") ~
+      get[String]("coutry") ~
+      get[Int]("rank") map {
       case id~game~rankType~date~country~rank => Rank(id, game, rankType, date,  country, rank)
     }
   }
 
-  //todo: finish and test
+  // Create a row parser object
+  val rowParser: RowParser[Pk[Long]~String~String~String~String~Int] = get[Pk[Long]]("id") ~ str("game") ~ str("type")  ~ str("date")  ~ str("country") ~int("rank")
 
-  /**
-   * Overloaded find for SingleDateRequest wrapper
-   * @param request - request object
-   * @return list of corresponding entries
-   */
-  def find(request: SingleDateRequest): Seq[Row] = {
-    find(game = request.application, rankType = request.rankType, date = request.date/*, country = request.country*/)
-  }
+
+
+  //todo: finish and test
 
   def find(game: String, rankType: String, date: String) = {
     DB.withConnection { implicit connection =>
       SQL(
         """
-        select * from ratings
-        where hash = {hash}
-        and game = {game}
+        select * from ratings where
+        game = {game}
         and type = {type}
         and date = {date}
       """
       ).on(
         'game -> game,
         'type -> rankType,
-        'date -> date,
-        'hash -> new String(MessageDigest.getInstance("MD5").digest((game+date).getBytes())) //we store data in single large table, so we'll use surrogate hash in index to speed up access
+        'date -> date
+//        'hash -> new String(MessageDigest.getInstance("MD5").digest((game+date).getBytes())) //we store data in single large table, so we'll use surrogate hash in index to speed up access
       ).list()
       //todo: http://www.playframework.org/documentation/2.0/ScalaAnorm
     }
   }
 
-  def find(game: String, rankType: String, dates: List[String], countries: List[String]) = {
-    //todo: IN clause http://stackoverflow.com/questions/9528273/in-clause-in-anorm
-
-    /*
-    User.find("id in (%s)"
-  .format(params.map("'%s'".format(_)).mkString(",") )
-  .list()
-
-    */
-
+  def find(game: String, rankType: String, date: String, countries: Set[String]) = {
     DB.withConnection { implicit connection =>
+
+    // Parse All Results from SQL Statement
+      val rsp : ResultSetParser[List[Pk[Long]~String~String~String~String~Int]] = rowParser *
+
       SQL(
-        """
-        select * from ratings
-        where hash = {hash}
-        and game = {game}
-        and type = {type}
-        and date IN ({dates})
-        and country IN ({countries})
-      """
+        """select * from ratings where
+        game={game}
+        and date={date}
+        and type={type}
+        and country in ('%s')
+        """  format countries.mkString("','")
       ).on(
         'game -> game,
+        'date -> date,
         'type -> rankType,
-        'dates -> dates.reduceLeft((acc, s) => acc + "," + s),
-        'countries -> countries.reduceLeft((acc, s) => acc + "," + s)
-        //'hash -> new String(MessageDigest.getInstance("MD5").digest((game+date).getBytes())) //we store data in single large table, so we'll use surrogate hash in index to speed up access
-      ).list()
-
+        'countries -> countries.mkString("','")
+      ).as(rsp).map {
+        case id~game~rankType~date~country~rank => Rank(id, game, rankType, date,  country, rank)
+      }
     }
   }
 
@@ -94,8 +82,8 @@ object Rank {
     DB.withConnection { implicit connection =>
       SQL(
         """
-          insert into ratings (game, type, date, country, rank, platform, hash) values (
-            {game}, {type}, {date}, {country}, {rank}, {platform}, {hash}
+          insert into ratings (game, type, date, country, rank, platform) values (
+            {game}, {type}, {date}, {country}, {rank}, {platform}
           )
         """
       ).on(
@@ -104,8 +92,8 @@ object Rank {
         'date -> rank.date,
         'country -> rank.country,
         'rank -> rank.rank,
-        'platform -> "ios",
-        'hash -> new String(MessageDigest.getInstance("MD5").digest((rank.game+rank.date).getBytes()))
+        'platform -> "ios"
+        //'hash -> new String(MessageDigest.getInstance("MD5").digest((rank.game+rank.date).getBytes()))
       ).executeUpdate()
     }
   }

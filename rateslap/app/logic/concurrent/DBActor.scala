@@ -1,7 +1,7 @@
 package logic.concurrent
 
 import models.Rank
-import logic.db.{Stop, SingleDateRequest}
+import logic.db.{Stop}
 import actors.Actor
 import org.awsm.rscommons.{StatsResponse, StatsRequest}
 import anorm.NotAssigned
