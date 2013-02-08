@@ -1,7 +1,5 @@
 package org.awsm.rscommons
 
-import collection.immutable.HashSet
-
 /**
  * Request container.
  * Contains:
@@ -15,7 +13,7 @@ import collection.immutable.HashSet
  * Date: 10/17/12
  */
 
-class StatsRequest(val application: String, val store: String, val rankType: String, val dates: List[String],  val countries: Set[String], val auth: AuthObject) extends JsonWrapper {
+class StatsRequest(val application: String, val store: String, val rankType: String, val dates: List[String],  val countries: Set[String], val authObject: AuthObject) extends JsonWrapper {
 
   def this(application: String, store: String, rankType: String, date: String, countries: Set[String], auth: AuthObject) = {
     this(application, store, rankType, date::List(), countries, auth)
@@ -24,5 +22,7 @@ class StatsRequest(val application: String, val store: String, val rankType: Str
   def this(application: String, store: String, rankType: String, dates: List[String], country: String, auth: AuthObject) = {
     this(application, store, rankType, dates, Set()+country, auth)
   }
+
+  override def toString() = "StatsRequest(application: "+application+", store: "+store+", rankType: "+rankType+", dates: "+dates+", countries: "+countries+", authObject: "+authObject.toString+")"
 }
 

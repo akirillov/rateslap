@@ -8,6 +8,9 @@ object ApplicationBuild extends Build {
   val appName         = "rateslap"
   val appVersion      = "1.0-SNAPSHOT"
 
+  scalaVersion := "2.10.0"
+  scalaBinaryVersion := "2.10"
+
   val appDependencies = Seq(
     "org.awsm.rscore" % "rs-core_2.10" % "0.0.1",
     "org.awsm.rscommons" % "rs-commons_2.10" % "0.0.1",
@@ -19,8 +22,8 @@ object ApplicationBuild extends Build {
 
   lazy  val main = play.Project(appName, appVersion, appDependencies).settings(
     scalaVersion:="2.10.0",
+    scalaBinaryVersion := "2.10",
+    scalaVersion in ThisBuild := "2.10.0",
     resolvers += Resolver.file("Local SBT Repository", file(Path.userHome.absolutePath+"/.ivy2/local"))(Resolver.ivyStylePatterns)
-    //publishTo := Some(Resolver.file("Local SBT Repository", file(Path.userHome.absolutePath+"/.ivy2/local"))(Resolver.ivyStylePatterns))
-     // "Local SBT Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local" Resolver.
   )
 }

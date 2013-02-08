@@ -27,7 +27,7 @@ object TestRunner extends App {
 
 
 
-  val crawler = new AppAnnieCrawler(appName, store, rankType, new AuthObject("user", "secret"))
+  val crawler = new AppAnnieCrawler(appName, store, rankType, AuthObject("user", "secret"))
 
  /* val dispatcher = new AppAnnieDispatcher()
 

@@ -14,6 +14,8 @@ import org.awsm.rscommons.{StatsResponse, AuthObject, StatsRequest}
  */
 object RequestBuilder{
 
+  def getIdFromRequest(json: JsValue): String = getParameterFromJson(json, "id")
+
   def buildRequestFromJson(json: JsValue): StatsRequest = {
 
     /*TEST WITH
@@ -23,7 +25,7 @@ object RequestBuilder{
     */
 
     val params = (json  \ "params" ).asOpt[JsValue] match {
-      case Some(value) => value //validate for far future
+      case Some(value) => value //todo: validate for far future
       case None => throw JsonParamsException("No \"params\" field found in JSON request!")
     }
 
@@ -72,16 +74,24 @@ object RequestBuilder{
   }
 
 
-  def buildJsonResponse(data: StatsResponse): JsValue = {
+  def buildJsonResponse(request: StatsResponse, id: String): JsValue = {
     JsObject(
       Seq(
-        "application" -> JsString(data.application),
-        "store" -> JsString(data.store),
+        "jsonrpc" -> JsString("2.0"),
+        "result" -> JsObject(
+          Seq(
+            "application" -> JsString(request.application),
+            "store" -> JsString(request.store),
+            "rankType" -> JsString(request.rankType),
 
-            if(data.rankings != null) { "rankings" -> Json.toJson (data.rankings)} else {"rankings" -> JsNull},
+            if(request.rankings != null) { "rankings" -> Json.toJson (request.rankings)} else {"rankings" -> JsNull},
 
-        "error" -> JsString(data.error)
-      ))
+            "error" -> JsString(request.error)
+          )
+        ),
+        "id" -> JsString(id)
+      )
+    )
   }
   //todo: get and validate dates in extra method
 }

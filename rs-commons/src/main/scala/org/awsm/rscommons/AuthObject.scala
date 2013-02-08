@@ -5,4 +5,8 @@ package org.awsm.rscommons
  * Date: 10/21/12
  */
 
-class AuthObject(val username: String,  val password: String)
+case class AuthObject(username: String,  password: String)
+
+object AuthObject{
+  def create(username: String,  password: String): AuthObject = AuthObject(username,  password)
+}

@@ -10,7 +10,7 @@ import org.awsm.rscommons.{AuthObject, StatsResponse, StatsRequest}
 
 trait ParsingDispatcher {
   def getData(request: StatsRequest): StatsResponse = {
-    getData(request.application, request.store, request.rankType, request.dates, request.countries, request.auth)
+    getData(request.application, request.store, request.rankType, request.dates, request.countries, request.authObject)
   }
 
   def getData(application: String, store: String, rankType: String, date: List[String], country: Set[String], auth: AuthObject): StatsResponse

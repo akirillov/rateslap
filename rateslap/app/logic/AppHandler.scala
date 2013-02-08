@@ -19,6 +19,8 @@ object AppHandler {
   def getGameStats(request: JsValue): JsValue = {
 
     val statsRequest = RequestBuilder.buildRequestFromJson(request)
+    val requestId = RequestBuilder.getIdFromRequest(request)
+
 
     Logger.info("stats request created: "+statsRequest.toString())
 
@@ -28,8 +30,8 @@ object AppHandler {
     val future =  manager !? statsRequest
 
     future match {
-      case resp: StatsResponse => Logger.info("RESPONSE CAPTURED! "+resp); RequestBuilder.buildJsonResponse(resp)
-      case _ => RequestBuilder.buildJsonResponse(new StatsResponse("Unknown error occured. No data. See server log for details."))
+      case resp: StatsResponse => Logger.info("RESPONSE CAPTURED! "+resp); RequestBuilder.buildJsonResponse(resp, requestId)
+      case _ => RequestBuilder.buildJsonResponse(new StatsResponse("Unknown error occured. No data. See server log for details."), requestId)
     }
   }
 

@@ -65,7 +65,7 @@ class ManagerActor extends Actor {
 //            Logger.info("DB result: "+ ranks )
 
             if (ranks.size == 0){
-              lazy val crawler = new AppAnnieCrawler(statsRequest.application, statsRequest.store, statsRequest.rankType, statsRequest.auth)
+              lazy val crawler = new AppAnnieCrawler(statsRequest.application, statsRequest.store, statsRequest.rankType, statsRequest.authObject)
               //TODO: redesign, create Java implementation for WebClient
 
               //todo: remove duplicate code from here (hide inside crawler and throw exception)
