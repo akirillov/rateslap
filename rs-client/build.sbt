@@ -19,5 +19,6 @@ ivyXML :=
     <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.2.3"></dependency>
   </dependencies>
 
+  seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 
-
+  exportJars := true

@@ -23,7 +23,6 @@ object ApplicationBuild extends Build {
   lazy  val main = play.Project(appName, appVersion, appDependencies).settings(
     scalaVersion:="2.10.0",
     scalaBinaryVersion := "2.10",
-    scalaVersion in ThisBuild := "2.10.0",
-    resolvers += Resolver.file("Local SBT Repository", file(Path.userHome.absolutePath+"/.ivy2/local"))(Resolver.ivyStylePatterns)
+    scalaVersion in ThisBuild := "2.10.0"
   )
 }
