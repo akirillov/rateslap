@@ -6,7 +6,7 @@ import sbt.RootProject._
 object ApplicationBuild extends Build {
 
   val appName         = "rateslap"
-  val appVersion      = "1.0-SNAPSHOT"
+  val appVersion      = "1.0"
 
   scalaVersion := "2.10.0"
   scalaBinaryVersion := "2.10"

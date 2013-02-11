@@ -8,7 +8,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.awsm.rsclient.JavaToScalaConverter;
 import org.awsm.rsclient.JsonBuilder;
 import org.awsm.rsclient.exception.ConnectionException;
-import org.awsm.rsclient.exception.InvalidRequestParameter;
+import org.awsm.rsclient.exception.InvalidRequestParameterException;
 import org.awsm.rsclient.exception.ResponseException;
 import org.awsm.rsclient.json.RSRequest;
 import org.awsm.rsclient.json.RSResponse;
@@ -19,38 +19,39 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.List;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
- * Created by: akirillov
- * Date: 2/5/13
+ * Main RateSlap Service Client providing Java API for interaction with service.
  */
 public class RateSlapClient {
-    private URL url;
+    private URI uri;
 
-    public RateSlapClient(String url) throws MalformedURLException {
-        this.url = new URL(url);
+    /**
+     * Single constructor initializing URI when invoked
+     * @param URI - String representation of URI
+     * @throws URISyntaxException - thrown in case of incorrect URI
+     */
+    public RateSlapClient(String URI) throws URISyntaxException {
+        this.uri = new URI(URI);
     }
 
-    private StatsResponse getAppAnnieGamesStats(RSRequest request){
-        // String req = JsonBuilder.buildJSONRequest(request, ServiceMethods.APPANNIE_GET_GAMES_STATS.toString);
 
-
-
-
-
-        return null;
-    }
-
+    /**
+     * Main method encapsulating client-server interaction logic.
+     * @param request - {@link RSRequest} object representing JSON-RPC request wrapper
+     * @return {@link org.awsm.rscommons.StatsResponse} unwrapped stats response object
+     * @throws ConnectionException
+     * @throws ResponseException
+     */
     private StatsResponse getResponse(RSRequest request) throws ConnectionException, ResponseException {
         DefaultHttpClient httpClient = new DefaultHttpClient();
 
         try{
-            HttpPost postRequest = new HttpPost(url.toURI());
+            HttpPost postRequest = new HttpPost(uri);
 
             StringEntity input = new StringEntity(JsonBuilder.buildJSONRequest(request));
             input.setContentType("application/json");
@@ -83,23 +84,41 @@ public class RateSlapClient {
             throw new ConnectionException("Error occurred during connection.", e);
         } catch (IOException e) {
             throw new ConnectionException("Error occurred during connection.", e);
-        } catch (URISyntaxException e) {
-            throw new ConnectionException("Error occurred during connection.", e);
         } finally {
             httpClient.getConnectionManager().shutdown();
         }
     }
 
-    private void validate(String ... args) throws InvalidRequestParameter {
+    /**
+     * Simple null or empty value validation method
+     * @param args - {@link String} args to be checked
+     * @throws org.awsm.rsclient.exception.InvalidRequestParameterException in case of null or empty argument
+     */
+    private void validate(String ... args) throws InvalidRequestParameterException {
         for(String arg: args){
-            if((arg == null)||("".equals(arg))) throw new InvalidRequestParameter("One of the method parameters is null or empty. No payload has been created.");
+            if((arg == null)||("".equals(arg))) throw new InvalidRequestParameterException("One of the method parameters is null or empty. No payload has been created.");
         }
     }
 
-    public StatsResponse getAppAnnieGamesStats(String application, String store, String rankType, List<String> dates, Set<String> countries, String username, String password) throws InvalidRequestParameter, ResponseException, ConnectionException {
+    /**
+     * Method encapsulates creation of {@link org.awsm.rscommons.StatsRequest} and sends it to {@link #getResponse(org.awsm.rsclient.json.RSRequest)}
+     * @param application - application name
+     * @param store - store name
+     * @param rankType - type of rank. For now the only possible rankType is "ranks"
+     * @param dates - {@link List<String>} of dates
+     * @param countries - {@link Set<String>} of countries
+     * @param username - AppAnnie username
+     * @param password - AppAnnie password
+     * @param o - {@link Object} o is necessary because of collection's generics type erasure to distinguish this method from {@link #getAppAnnieGamesStats(String, String, String, java.util.List, java.util.Set, String, String)}. Object o is never used.
+     * @return {@link org.awsm.rscommons.StatsResponse} object
+     * @throws org.awsm.rsclient.exception.InvalidRequestParameterException
+     * @throws ResponseException
+     * @throws ConnectionException
+     */
+    private StatsResponse getAppAnnieGamesStats(String application, String store, String rankType, List<String> dates, Set<String> countries, String username, String password, Object o) throws InvalidRequestParameterException, ResponseException, ConnectionException {
         validate(application, store,rankType, username, password);
-        if(dates.isEmpty()) throw new InvalidRequestParameter("Dates are empty. No payload has been created.");
-        if(countries.isEmpty()) throw new InvalidRequestParameter("Countries are empty. No payload has been created.");
+        if(dates.isEmpty()) throw new InvalidRequestParameterException("Dates are empty. No payload has been created.");
+        if(countries.isEmpty()) throw new InvalidRequestParameterException("Countries are empty. No payload has been created.");
 
         RSRequest request = new RSRequest("2.0", ServiceMethods.APPANNIE_GET_GAMES_STATS.toString(),
                 new StatsRequest(application, store, rankType,
@@ -111,7 +130,51 @@ public class RateSlapClient {
     }
 
 
-    //TODO: 1. javadoc 2. override getAppAnnieGamesStats(...) to work with Calendar 3. Write some tests 4. create github README
+    /**
+     * Overloaded public method for getting stats. Invokes private {@link #getAppAnnieGamesStats(String, String, String, java.util.List, java.util.Set, String, String, Object o)} inside
+     * @param application - application name
+     * @param store - store name
+     * @param rankType - type of rank. For now the only possible rankType is "ranks"
+     * @param dates - {@link List<Date>} of dates
+     * @param countries - {@link Set<String>} of countries
+     * @param username - AppAnnie username
+     * @param password - AppAnnie password
+     * @return {@link org.awsm.rscommons.StatsResponse} object
+     * @throws org.awsm.rsclient.exception.InvalidRequestParameterException
+     * @throws ResponseException
+     * @throws ConnectionException
+     */
+    public StatsResponse getAppAnnieGamesStats(String application, String store, String rankType, List<Date> dates, Set<String> countries, String username, String password) throws ResponseException, InvalidRequestParameterException, ConnectionException {
+        List<String> stringDates = new ArrayList<String>(dates.size());
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+        for(Date date: dates){
+            stringDates.add(format.format(date));
+        }
+
+        return getAppAnnieGamesStats(application, store, rankType, stringDates, countries, username, password, null);
+    }
 
 
+    /**
+     * Overloaded alternative for {@link #getAppAnnieGamesStats(String, String, String, java.util.List, java.util.Set, String, String)} with single date
+     */
+    public StatsResponse getAppAnnieGamesStats(String application, String store, String rankType, Date date, Set<String> countries, String username, String password) throws InvalidRequestParameterException, ResponseException, ConnectionException {
+        return getAppAnnieGamesStats(application, store, rankType, Arrays.asList(date), countries, username, password);
+    }
+
+    /**
+     * Overloaded alternative for {@link #getAppAnnieGamesStats(String, String, String, java.util.List, java.util.Set, String, String)} with single country
+     */
+    public StatsResponse getAppAnnieGamesStats(String application, String store, String rankType, List<Date> dates, String country, String username, String password) throws InvalidRequestParameterException, ResponseException, ConnectionException {
+        return getAppAnnieGamesStats(application, store, rankType, dates, new HashSet<String>(Arrays.asList(country)), username, password);
+    }
+
+    /**
+     * Overloaded alternative for {@link #getAppAnnieGamesStats(String, String, String, java.util.List, java.util.Set, String, String)} with single date and single country
+     */
+    public StatsResponse getAppAnnieGamesStats(String application, String store, String rankType, Date date, String country, String username, String password) throws InvalidRequestParameterException, ResponseException, ConnectionException {
+        return getAppAnnieGamesStats(application, store, rankType, Arrays.asList(date), new HashSet<String>(Arrays.asList(country)), username, password);
+    }
 }

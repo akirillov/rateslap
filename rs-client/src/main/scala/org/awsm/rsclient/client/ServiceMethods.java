@@ -4,7 +4,7 @@ package org.awsm.rsclient.client;
  * Created by: akirillov
  * Date: 2/5/13
  */
-public enum ServiceMethods {
+enum ServiceMethods {
     APPANNIE_GET_GAMES_STATS("getGamesStats");
 
 

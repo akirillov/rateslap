@@ -42,6 +42,9 @@ class StatsResponse(val application: String,  val store: String, val rankType: S
       case d => rankings.getOrElse(d , throw new RankNotFoundException("Specified date is not presented in ranks list")).getOrElse(country, null)
     }
   }
+
+  override def toString() = "StatsResponse(application: "+application+", store: "+store+", rankType: "+rankType+", rankings: "+rankings+", error: "+error+")"
+
 }
 
 //todo: switch to case class
