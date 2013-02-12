@@ -14,9 +14,9 @@ object RateSlapBuild extends Build {
 
   lazy val rscore = Project(id = "rscore", base = file("rs-core")) dependsOn(rscommons)
 
-  lazy val rscommons = Project(id = "rscommons", base = file("rs-commons"))
+  lazy val rscommons = Project(id = "rscommons", base = file("rs-commons")) settings(exportJars := true)
 
-  lazy val rsclient = Project(id = "rsclient", base = file("rs-client")) dependsOn(rscommons) aggregate (rscommons)
+  lazy val rsclient = Project(id = "rsclient", base = file("rs-client")) dependsOn(rscommons) aggregate (rscommons) settings(exportJars := true)
 
   lazy val root = Project(id = "rateslap", base = file(".")) aggregate(rateslap, rscore, rscommons, rsclient)
 }
