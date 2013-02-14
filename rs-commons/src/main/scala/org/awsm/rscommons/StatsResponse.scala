@@ -34,7 +34,7 @@ class StatsResponse(val application: String,  val store: String, val rankType: S
     this(null,  null, null, null, error)
   }
 
-  override def getRank(date: String, country: String): String =  {
+  override def getRank(country: String, date: String): String =  {
     if (error != null) throw new NoDataFoundException("This response contains no data. Check error message for details")
     else date match {
       case null => if(rankings.size == 1) rankings.values.head.getOrElse(country, null)

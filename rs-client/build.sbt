@@ -16,8 +16,6 @@ resolvers +=  "Spray Repo" at "http://repo.spray.io/"
 
 libraryDependencies += "io.spray" %% "spray-json" % "1.2.3"
 
-libraryDependencies += "org.awsm.rscommons" %% "rs-commons" % "0.0.1"
-
 ivyXML :=
   <dependencies>
     <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.2.3"></dependency>

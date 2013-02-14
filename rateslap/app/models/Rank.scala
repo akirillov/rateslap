@@ -30,10 +30,6 @@ object Rank {
   // Create a row parser object
   val rowParser: RowParser[Pk[Long]~String~String~String~String~Int] = get[Pk[Long]]("id") ~ str("game") ~ str("type")  ~ str("date")  ~ str("country") ~int("rank")
 
-
-
-  //todo: finish and test
-
   def find(game: String, rankType: String, date: String) = {
     DB.withConnection { implicit connection =>
       SQL(
@@ -49,7 +45,6 @@ object Rank {
         'date -> date
 //        'hash -> new String(MessageDigest.getInstance("MD5").digest((game+date).getBytes())) //we store data in single large table, so we'll use surrogate hash in index to speed up access
       ).list()
-      //todo: http://www.playframework.org/documentation/2.0/ScalaAnorm
     }
   }
 
