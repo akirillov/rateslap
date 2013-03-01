@@ -16,9 +16,7 @@ object JsonHandler extends  Controller{
   def handleJsonRequest =  Action(parse.json) {
       request =>
         (request.body \ "method").asOpt[String].map { method => method match {
-          case "getGamesStats" => Ok(AppHandler.getGameStats(request.body))//TODO: present as String and parse in commons.JsonBuilder
-//          case "getMultiGamesStats" =>  Ok(AppHandler.getMultiGamesStats(request.body))
-
+          case "getGamesStats" => Ok(AppHandler.getGameStats(request.body))//TODO: present as String and parse in commons.JsonBuilder (?)
           case _ =>  Ok(ErrorConstructor.constructError((request.body \ "id").asOpt[String], -32601, "Method "+method+" not found"))
         }
         }.getOrElse {

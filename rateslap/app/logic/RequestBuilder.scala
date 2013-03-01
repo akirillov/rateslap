@@ -16,20 +16,18 @@ import java.util.{Calendar, Date}
 object RequestBuilder{
 
   private val format = new SimpleDateFormat("yyyy-MM-dd")
+  format.setLenient(false)
 
-  def getIdFromRequest(json: JsValue): String = getParameterFromJson(json, "id")
+  def getIdFromRequest(json: JsValue): Option[String] = {
+    try {
+      Some(getParameterFromJson(json, "id"))
+    } catch {
+      case p: JsonParamsException => None
+    }
+  }
 
   def buildRequestFromJson(json: JsValue): StatsRequest = {
-
-    //TODO: remove this comment to documentation
-    /*TEST WITH
-
-    curl -v -H "Content-Type: application/json" -X GET -d '{"jsonrpc": "2.0", "method": "getGamesStats","params": {"application":"Cut The Rope", "store":"appstore", "dates":["2012-01-01","20120-01-02"],"rankType":"inapp", "countries":["USA","Canada"], "authObject":{"username":"user", "password":"secret"}}, "id": "1"}' http://localhost:9000/rpc.json
-
-    */
-
     //TODO: move JSON parsing to commons, it is already implemented there with Spray-Json
-
     val params = (json  \ "params" ).asOpt[JsValue] match {
       case Some(value) => value
       case None => throw JsonParamsException("No \"params\" field found in JSON request!")
@@ -103,13 +101,15 @@ object RequestBuilder{
   }
 
   def validateDates(dates: List[String]) {
-    dates.foreach(date =>
-      try{
-        val date = format.parse(date)
-        if(!date.before(new Date())) throw JsonParamsException("The date from far future provided in request!")
-      } catch {
-        case e: ParseException => throw JsonParamsException("Invalid date provided in request!")
-      }
+    dates.foreach(d =>{
+      if(d.length()!=10) throw JsonParamsException("Invalid date format provided in request! Format: yyyy-MM-dd")
+        try{
+          val date: Date = format.parse(d)
+          if(!date.before(new Date())) throw JsonParamsException("The date from far future has been provided in request!")
+        } catch {
+          case e: ParseException => throw JsonParamsException("Invalid date format provided in request! Format: yyyy-MM-dd")
+        }
+    }
     )
   }
 }

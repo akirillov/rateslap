@@ -72,7 +72,7 @@ public class RateSlapClient {
                 builder.append(aux);
             }
 
-
+            System.out.println("RESPONSE:\n"+builder.toString());
             RSResponse response = JsonBuilder.buildResponseFromJSON(builder.toString());
 
             if(response.error()!=null) throw new ResponseException("Error occurred during interaction with server: "+response.error());

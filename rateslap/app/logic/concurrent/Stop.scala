@@ -1,8 +1,8 @@
-package logic.db
+package logic.concurrent
 
 /**
  * Created by: akirillov
- * Date: 11/29/12
+ * Date: 2/19/13
  */
 
 case object Stop

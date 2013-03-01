@@ -50,6 +50,9 @@ object RSResponseProtocol extends DefaultJsonProtocol {
               case Seq(JsString(application), JsString(store), JsString(rankType), rankings,  JsNull) =>
                 RSResponse(jsonrpc = jsonrpc, id = id, result = new StatsResponse(application, store, rankType, rankings.convertTo[Map[String,  Map[String, String]]]), error = null)
 
+              case Seq(JsNull, JsNull, JsNull, JsNull,  JsString(error)) =>
+                RSResponse(jsonrpc = jsonrpc, id = id, result = new StatsResponse(error), error = null)
+
               case _ => throw new DeserializationException("StatsResponse expected!")
             }
 

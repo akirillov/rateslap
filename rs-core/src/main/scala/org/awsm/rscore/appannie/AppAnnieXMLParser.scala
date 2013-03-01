@@ -2,8 +2,8 @@ package org.awsm.rscore.appannie
 
 import org.awsm.rscore.{XmlParser}
 import org.awsm.rscommons.StatsResponse
-import xml.{Node, NodeSeq, Elem}
 import org.awsm.rscore.exception.ParsingException
+import xml.{XML, Node, NodeSeq, Elem}
 
 /**
  * Created by: akirillov
@@ -11,18 +11,18 @@ import org.awsm.rscore.exception.ParsingException
  */
 
 class AppAnnieXMLParser extends XmlParser{
-  override def parse(source: Elem) = {
+  override def parse(input: String) = {
+    val source = XML.loadString(input)
+
     val countries = (source \\ "tr" filter(p  =>  (p \ "@class").text.equals("ranks") && !((p \\ "a" text).equals("")))).toList
+
     val ranks = (source \\ "tr" filter(p  =>  (p \ "@class").text.equals("ranks")))
       .filter (n => ((n \\ "td").size > 0) && ((n \\ "td").head \ "@title" text).equals("Rank #"))
       .map(r => (r \\ "td").head)
-
-    //todo: check list and throw exception
-
-    println("Countries size: "+countries.size +"  Ranks size: "+ranks.size)
-    /*if ((countries.size == 0)||(ranks.size==0)){
-      println(source)
-    }*/
+    
+    if ((ranks.size <= 0)||(countries.size <= 0)||(ranks.size != countries.size)){
+      throw ParsingException("Internal parser error! Ranks and Countries sizes are invalid, please check "+getClass.getName+" parser!")
+    }
 
     def createPair(country: Node, rank: Node): Pair[String, String] = {
       val result = ( (country \\ "a" text).replaceAll("\\n", "").trim(), rank.text.replaceAll("\\n", "").trim() )

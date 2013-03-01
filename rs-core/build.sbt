@@ -10,6 +10,10 @@ scalaBinaryVersion := "2.10"
 
 scalaVersion in ThisBuild := "2.10.0"
 
-libraryDependencies += "net.sourceforge.htmlunit" % "htmlunit" % "2.10"
+libraryDependencies += "org.specs2" % "specs2_2.10" % "1.13" % "test"
+
+libraryDependencies += "net.sourceforge.htmlunit" % "htmlunit" % "2.11"
+
+
 
 

@@ -29,7 +29,6 @@ class ManagerActor extends Actor {
 
       for(rank <- ranks) {
         if(date.equals("")){
-          
           date = rank.date
         }
         result.put(rank.country, rank.rank.toString() )
@@ -45,11 +44,13 @@ class ManagerActor extends Actor {
       }
     }
 
+    lazy val crawler = new AppAnnieCrawler(request.application, request.store, request.rankType, request.authObject)
 
     loopWhile(!jobFinished){
       react{
 
         case statsRequest: StatsRequest => {
+          
           if(request == null){
             request = statsRequest
           }
@@ -58,25 +59,17 @@ class ManagerActor extends Actor {
           }
 
           statsRequest.dates.foreach(date => {
-
             //here we are looking for entry in DB. If there is no entry for this date -> request from AppAnnie for this date
+            Logger.info("Trying to get data for "+date+ " from DB")
             val ranks = Rank.find(request.application, request.rankType, date, request.countries)
 
-//            Logger.info("DB result: "+ ranks )
-
             if (ranks.size == 0){
-              lazy val crawler = new AppAnnieCrawler(statsRequest.application, statsRequest.store, statsRequest.rankType, statsRequest.authObject)
-              //TODO: redesign, create Java implementation for WebClient
-
-              //todo: remove duplicate code from here (hide inside crawler and throw exception)
-              val xml: String = crawler.crawl(date) match {
-                case None => throw NoResultsFoundException("No page found for "+date)
-                case Some(page) => page
-              }
-
-              new ParserActor().start() ! SingleDateRequestWithData(statsRequest.application, statsRequest.store, statsRequest.rankType, date, xml)
+              Logger.info("Data for "+date+ " not found in DB")
+              new ParserActor(crawler).start ! SingleDateRequestWithData(date)
+              Logger.debug("Request sent to parser")
 
             } else {
+              Logger.info("Data for "+date+ " found in DB!")
               val dbResult = buildStatsResponse(ranks)
 
               Logger.info("dbResult._1 = "+dbResult._1+"  dbResult._2 = "+dbResult._2)

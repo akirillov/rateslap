@@ -1,9 +1,10 @@
 package logic.db
 
+import org.awsm.rscore.appannie.AppAnnieCrawler
+
 /**
  * Created by: akirillov
  * Date: 2/1/13
  */
 
-case class SingleDateRequestWithData(application: String, store: String, rankType: String,  date: String, xml: String)
-
+case class SingleDateRequestWithData(date: String)
