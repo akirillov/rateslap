@@ -1,4 +1,6 @@
---- !Ups
+# ratings schema
+
+# --- !Ups
 
 CREATE TABLE `ratings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -13,6 +15,6 @@ CREATE TABLE `ratings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
---- !Downs
+# --- !Downs
 
 DROP TABLE  ratings;
